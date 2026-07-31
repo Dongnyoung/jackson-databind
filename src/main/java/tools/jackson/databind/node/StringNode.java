@@ -342,6 +342,7 @@ public class StringNode
     protected Integer _tryParseAsInteger() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateIntegerLength(_value);
                 // NumberInput does not have a good match so..
                 return Integer.parseInt(_value);
             } catch (NumberFormatException e) {
@@ -354,6 +355,7 @@ public class StringNode
     protected Long _tryParseAsLong() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateIntegerLength(_value);
                 return NumberInput.parseLong(_value);
             } catch (NumberFormatException e) {
                 ;
@@ -365,6 +367,7 @@ public class StringNode
     protected BigInteger _tryParseAsBigInteger() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateIntegerLength(_value);
                 return NumberInput.parseBigInteger(_value, true);
             } catch (NumberFormatException e) {
                 ;
@@ -376,6 +379,7 @@ public class StringNode
     protected Float _tryParseAsFloat() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateFPLength(_value);
                 return NumberInput.parseFloat(_value, true);
             } catch (NumberFormatException e) {
                 ;
@@ -387,6 +391,7 @@ public class StringNode
     protected Double _tryParseAsDouble() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateFPLength(_value);
                 return NumberInput.parseDouble(_value, true);
             } catch (NumberFormatException e) {
                 ;
@@ -398,12 +403,21 @@ public class StringNode
     protected BigDecimal _tryParseAsBigDecimal() {
         if (NumberInput.looksLikeValidNumber(_value)) {
             try {
+                _validateFPLength(_value);
                 return NumberInput.parseBigDecimal(_value, true);
             } catch (NumberFormatException e) {
                 ;
             }
         }
         return null;
+    }
+
+    private static void _validateIntegerLength(String value) {
+        StreamReadConstraints.defaults().validateIntegerLength(value.length());
+    }
+
+    private static void _validateFPLength(String value) {
+        StreamReadConstraints.defaults().validateFPLength(value.length());
     }
     
     /*

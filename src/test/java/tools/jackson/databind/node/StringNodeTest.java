@@ -1,6 +1,12 @@
 package tools.jackson.databind.node;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.junit.jupiter.api.Test;
+
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.exc.StreamConstraintsException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,5 +60,44 @@ public class StringNodeTest extends NodeTestBase
     public void testHashCode()
     {
         assertEquals("abc".hashCode(), new StringNode("abc").hashCode());
+    }
+
+    @Test
+    public void testTooLongNumericStringCoercionFails()
+    {
+        StringNode n = StringNode.valueOf(_repeat('9',
+                StreamReadConstraints.defaults().getMaxNumberLength() + 1));
+
+        assertThrows(StreamConstraintsException.class, () -> n.asInt());
+        assertThrows(StreamConstraintsException.class, () -> n.asLong());
+        assertThrows(StreamConstraintsException.class, () -> n.asBigInteger());
+        assertThrows(StreamConstraintsException.class, () -> n.asFloat());
+        assertThrows(StreamConstraintsException.class, () -> n.asDouble());
+        assertThrows(StreamConstraintsException.class, () -> n.asDecimal());
+    }
+
+    @Test
+    public void testTooLongNonNumericStringCoercionDefaults()
+    {
+        StringNode n = StringNode.valueOf(_repeat('a',
+                StreamReadConstraints.defaults().getMaxNumberLength() + 1));
+
+        assertEquals(13, n.asInt(13));
+        assertEquals(17L, n.asLong(17L));
+        assertEquals(BigInteger.TEN, n.asBigInteger(BigInteger.TEN));
+        assertEquals(0.25f, n.asFloat(0.25f));
+        assertEquals(0.5d, n.asDouble(0.5d));
+        assertEquals(BigDecimal.TEN, n.asDecimal(BigDecimal.TEN));
+        assertFalse(n.asBigIntegerOpt().isPresent());
+        assertFalse(n.asDecimalOpt().isPresent());
+    }
+
+    private static String _repeat(char ch, int len)
+    {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; ++i) {
+            sb.append(ch);
+        }
+        return sb.toString();
     }
 }
